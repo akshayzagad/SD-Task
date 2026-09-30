@@ -1,122 +1,35 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useMemo, useState } from 'react'
+import { Button, TextField } from '@mui/material'
+import Navbar, { Brand } from './components/common/Navbar.jsx'
+import MovieCard from './components/movie/MovieCard.jsx'
 import './App.css'
 
+const movies = [
+  { id: 1, title: 'Dune: Part Two', year: 2024, rating: 8.6, genre: 'Sci-Fi', runtime: '2h 46m', poster: 'https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg', description: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.' },
+  { id: 2, title: 'Poor Things', year: 2023, rating: 7.8, genre: 'Drama', runtime: '2h 21m', poster: 'https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXq3rXM6c5wMxcT.jpg', description: 'The incredible tale and fantastical evolution of Bella Baxter, a young woman brought back to life by a brilliant scientist.' },
+  { id: 3, title: 'Past Lives', year: 2023, rating: 8.0, genre: 'Romance', runtime: '1h 46m', poster: 'https://image.tmdb.org/t/p/w500/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg', description: 'Two deeply connected childhood friends are wrested apart after one family emigrates from South Korea.' },
+  { id: 4, title: 'The Batman', year: 2022, rating: 7.7, genre: 'Action', runtime: '2h 56m', poster: 'https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg', description: 'Batman ventures into Gotham City’s underworld when a sadistic killer leaves behind a trail of cryptic clues.' },
+  { id: 5, title: 'Spider-Man: Across the Spider-Verse', year: 2023, rating: 8.4, genre: 'Animation', runtime: '2h 20m', poster: 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj copy.jpg'.replace(' copy', ''), description: 'Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting it.' },
+  { id: 6, title: 'Oppenheimer', year: 2023, rating: 8.1, genre: 'Drama', runtime: '3h 00m', poster: 'https://image.tmdb.org/t/p/w500/ptpr0kGAckfQkJeJIt8st5dglvd.jpg', description: 'The story of J. Robert Oppenheimer and his role in the development of the atomic bomb.' },
+]
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [dark, setDark] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [page, setPage] = useState('home')
+  const [query, setQuery] = useState(localStorage.getItem('lastMovieSearch') || '')
+  const [genre, setGenre] = useState('All genres')
+  const [detail, setDetail] = useState(null)
+  const [favorites, setFavorites] = useState(() => { try { return JSON.parse(localStorage.getItem('favoriteMovies') || '[]') } catch { return [] } })
+  const filtered = useMemo(() => movies.filter(m => (!query || m.title.toLowerCase().includes(query.toLowerCase())) && (genre === 'All genres' || m.genre === genre)), [query, genre])
+  const toggleFavorite = movie => setFavorites(current => { const next = current.some(m => m.id === movie.id) ? current.filter(m => m.id !== movie.id) : [...current, movie]; localStorage.setItem('favoriteMovies', JSON.stringify(next)); return next })
+  const search = value => { setQuery(value); localStorage.setItem('lastMovieSearch', value) }
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+  if (!loggedIn) return <main className={`login-page ${dark ? 'dark' : ''}`}><section className="login-art"><div className="login-art-content"><Brand onClick={() => {}}/><p className="eyebrow">YOUR NEXT FAVORITE FILM</p><h1>Stories worth<br/>staying in for.</h1><p className="login-lede">A little inspiration for your next movie night.</p><div className="mini-posters">{movies.slice(0, 4).map(m => <img key={m.id} src={m.poster} alt="" />)}</div><div className="art-caption">A universe of stories, all in one place.</div></div></section><section className="login-panel"><div className="login-box"><span className="eyebrow">WELCOME TO FRAME</span><h2>Find your next<br/>great watch.</h2><p className="muted">Sign in to keep your favorites close.</p><form onSubmit={e => { e.preventDefault(); if (username.trim() && password.trim()) setLoggedIn(true) }}><label>Username</label><TextField fullWidth size="small" placeholder="Your username" value={username} onChange={e => setUsername(e.target.value)} required/><label>Password</label><TextField fullWidth size="small" type="password" placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} required/><Button type="submit" variant="contained" fullWidth>Sign in <span>→</span></Button></form><p className="login-note">Demo sign in · enter any username and password</p></div></section></main>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+  return <div className={`app-shell ${dark ? 'dark' : ''}`}><Navbar page={page} setPage={setPage} dark={dark} setDark={setDark} query={query} onSearch={search} loggedIn={loggedIn} onLogout={() => setLoggedIn(false)}/><main className="main-content">{detail ? <section className="detail-view"><button className="back-link" onClick={() => setDetail(null)}>← Back to {page === 'favorites' ? 'watchlist' : 'discover'}</button><div className="detail-layout"><img className="detail-poster" src={detail.poster} alt={`${detail.title} poster`}/><div className="detail-copy"><span className="eyebrow">{detail.genre} FILM</span><h1>{detail.title}</h1><div className="detail-facts"><span>◷ {detail.runtime}</span><span>{detail.year}</span><span className="rating">★ {detail.rating} <small>/ 10</small></span></div><p>{detail.description}</p><div className="detail-actions"><Button variant="contained" onClick={() => toggleFavorite(detail)}>{favorites.some(m => m.id === detail.id) ? '♥ In your watchlist' : '＋ Add to watchlist'}</Button><a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${detail.title} official trailer`)}`} target="_blank" rel="noreferrer" className="trailer-link">▶ Watch trailer</a></div><div className="detail-extra"><div><span className="eyebrow">DIRECTOR</span><strong>Featured filmmaker</strong></div><div><span className="eyebrow">CAST</span><strong>Explore the ensemble ↗</strong></div></div></div></div></section> : page === 'favorites' ? <><div className="page-heading"><div><span className="eyebrow">YOUR COLLECTION</span><h1>My watchlist<span className="brand-dot">.</span></h1><p>All the films you’re saving for later.</p></div><span className="count-pill">{favorites.length} FILMS</span></div>{favorites.length ? <div className="movie-grid">{favorites.map(m => <MovieCard key={m.id} movie={m} favorite onFavorite={toggleFavorite} onOpen={setDetail}/>)}</div> : <div className="empty-state"><span>♡</span><h2>Your watchlist is waiting.</h2><p>Save films you want to remember and they’ll show up here.</p><Button variant="contained" onClick={() => setPage('home')}>Explore films</Button></div>}</> : <><section className="hero"><div className="hero-copy"><span className="eyebrow"><i/> CURATED FOR YOUR NEXT MOVIE NIGHT</span><h1>Find a film<br/>that <em>feels</em> right.</h1><p>From new discoveries to all-time favorites,<br/>your next great watch starts here.</p><div className="hero-search"><span>⌕</span><input placeholder="What are you in the mood for?" value={query} onChange={e => search(e.target.value)} /><button onClick={() => document.querySelector('.hero-search input')?.focus()}>Explore <b>→</b></button></div><div className="popular-searches"><span>TRY:</span>{['Dune', 'Drama', 'Spider-Man'].map(t => <button key={t} onClick={() => search(t)}>{t}</button>)}</div></div><div className="hero-poster-wrap"><div className="hero-glow"/><img className="hero-poster" src={movies[0].poster} alt="Dune: Part Two poster"/><div className="floating-rating">★ <b>8.6</b><small>TOP PICK</small></div><div className="floating-note"><span>NOW SHOWING</span><b>Dune: Part Two</b><small>Adventure · Sci-Fi</small></div></div><div className="hero-index">01 <span>—</span> 04</div></section><div className="section-toolbar"><div><span className="eyebrow">HANDPICKED FOR YOU</span><h2>{query ? 'Search results' : 'Trending this week'}<span className="brand-dot">.</span></h2></div><div className="filters"><select aria-label="Filter by genre" value={genre} onChange={e => setGenre(e.target.value)}>{['All genres', ...new Set(movies.map(m => m.genre))].map(g => <option key={g}>{g}</option>)}</select><button className="view-all" onClick={() => { setGenre('All genres'); search('') }}>View all <span>→</span></button></div></div>{filtered.length ? <div className="movie-grid">{filtered.map(m => <MovieCard key={m.id} movie={m} favorite={favorites.some(f => f.id === m.id)} onFavorite={toggleFavorite} onOpen={setDetail}/>)}</div> : <div className="empty-results"><span>⌕</span><div><b>No films found for “{query}”</b><p>Try another title or clear your genre filter.</p></div><button onClick={() => { search(''); setGenre('All genres') }}>Clear filters</button></div>}<section className="quote-strip"><span>THE FRAME EDIT</span><p>“Cinema is a matter of what’s in the frame and what’s out.”</p><small>— MARTIN SCORSESE</small></section></>}</main><footer><button className="brand" onClick={() => { setPage('home'); setDetail(null) }}><span className="brand-mark">◈</span> frame<span className="brand-dot">.</span></button><span>Made for people who love a good story.</span><span>© 2024 FRAME FILM GUIDE</span></footer></div>
 }
 
 export default App

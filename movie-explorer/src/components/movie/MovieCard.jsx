@@ -1,0 +1,3 @@
+export default function MovieCard({ movie, favorite, onFavorite, onOpen }) {
+  return <article className="movie-card"><button className="poster-button" onClick={() => onOpen(movie)} aria-label={`View ${movie.title} details`}><img src={movie.poster} alt={`${movie.title} poster`} /><span className="poster-overlay">View details <b>↗</b></span></button><button className={`favorite-button ${favorite ? 'is-favorite' : ''}`} onClick={() => onFavorite(movie)} aria-label={favorite ? 'Remove from watchlist' : 'Add to watchlist'}>{favorite ? '♥' : '♡'}</button><div className="movie-meta"><div><h3>{movie.title}</h3><p>{movie.year} <span>·</span> {movie.genre}</p></div><span className="rating">★ {movie.rating}</span></div></article>
+}
